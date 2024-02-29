@@ -16,7 +16,6 @@ import { AuthContext } from '../context/AuthContext';
 import OfMessagesScreen from '../screens/OfMessagesScreen'
 
 const Drawer = createDrawerNavigator();
-const Stack = createNativeStackNavigator();
 
 export default function AppStack() {
   const [isConnected, setIsConnected] = useState(socket.connected);

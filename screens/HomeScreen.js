@@ -8,7 +8,7 @@ export default function HomeScreen() {
     const navigation = useNavigation()
     return(
      <SafeAreaView className="flex-1" style={{backgroundColor: 'white'}}>
-        <View className="justify-center items-center">
+        <View className="justify-center items-center" style={{width: "100%"}}>
             <Image source={require('../assets/images/logo.png')} style={{marginTop: 20}}></Image>
         </View>
         <View className="flex-1 flex justify-around my-4">

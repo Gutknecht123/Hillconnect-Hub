@@ -21,6 +21,15 @@ export const AuthProvider = ({children}) => {
     const [userToken, setUserToken] = useState(null)
     const [userInfo, setUserInfo] = useState(null)
 
+    const logout = () => {
+        setIsLoading(true)
+        setUserToken(null)
+        AsyncStorage.removeItem('userToken')
+        AsyncStorage.removeItem('userInfo')
+        setIsLoading(false)
+
+    }
+
     const globalImportantMessage = async (message) => {
         let m = message
         if(m.length > 25){
@@ -56,9 +65,16 @@ export const AuthProvider = ({children}) => {
     const deleteIM = async(postID) => {
 
         try{
+            let userToken = await AsyncStorage.getItem('userToken')
+            const config = {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${userToken}`
+                }
+              };
             const response = await axios.post(`${BASE_URL}/deleteIM`, {
                 postID
-            })
+            }, config)
             return response
             
         }catch(err){
@@ -106,12 +122,21 @@ export const AuthProvider = ({children}) => {
             Alert.alert('', 'Hasła się nie zgadzają!')
             return "failed"
         }
+
+        let userToken = await AsyncStorage.getItem('userToken')
+        const config = {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userToken}`
+            }
+          };
+
         try{
             const response = await axios.post(`${BASE_URL}/changePass`, {
                 email,
                 pass,
                 newPass
-            })
+            }, config)
             console.log('zmieniono haslo')
             Alert.alert('', 'Hasło zostało zmienione.')
             setUserToken(null)
@@ -166,6 +191,14 @@ export const AuthProvider = ({children}) => {
             return "failed"
         }
 
+        let userToken = await AsyncStorage.getItem('userToken')
+        const config = {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userToken}`
+            }
+          };
+
         try{
         const response = await axios.post(`${BASE_URL}/userRegister`, {
             name,
@@ -174,7 +207,7 @@ export const AuthProvider = ({children}) => {
             surname,
             role,
             email
-        })
+        }, config)
         Alert.alert('',"Pomyślnie dodano użytkownika!")
             return response
 
@@ -186,30 +219,58 @@ export const AuthProvider = ({children}) => {
     }
     const getMessages = async (username, count) => {
 
-        const response = await axios.get(`${BASE_URL}/messages?username=${username}&count=${count}`)
+        try{
+            let userToken = await AsyncStorage.getItem('userToken')
+            const config = {
+                headers: {
+                  'Authorization': `Bearer ${userToken}`
+                }
+              };
+        const response = await axios.get(`${BASE_URL}/messages?username=${username}&count=${count}`, config)
         return response.data
-    }
-
-    const logout = () => {
-        setIsLoading(true)
-        setUserToken(null)
-        AsyncStorage.removeItem('userToken')
-        AsyncStorage.removeItem('userInfo')
-        setIsLoading(false)
-
+        }catch(err){
+            console.log(err)
+            Alert.alert('',"Sesja wygasła, zaloguj się ponownie")
+            logout()
+        }
     }
 
     const getOfficeMessages = async () => {
 
-        const response = await axios.get(`${BASE_URL}/officemessages`)
-        return response.data
+        try{
+            let userToken = await AsyncStorage.getItem('userToken')
+            const config = {
+                headers: {
+                  'Authorization': `Bearer ${userToken}`
+                }
+              };
+            const response = await axios.get(`${BASE_URL}/officemessages`, config)
+            return response.data
+        }catch(err){
+            console.log(err)
+            Alert.alert('',"Sesja wygasła, zaloguj się ponownie")
+            logout()
+        }
 
     }
 
     const getImportantMessages = async () =>{
 
-        const response = await axios.get(`${BASE_URL}/importantmessages`)
-        return response.data
+        try{
+            let userToken = await AsyncStorage.getItem('userToken')
+            const config = {
+                headers: {
+                  'Authorization': `Bearer ${userToken}`
+                }
+              };
+            const response = await axios.get(`${BASE_URL}/importantmessages`, config)
+            return response.data
+
+        }catch(err){
+            console.log(err)
+            Alert.alert('',"Sesja wygasła, zaloguj się ponownie")
+            logout()
+        }
 
     }
 
@@ -233,9 +294,12 @@ export const AuthProvider = ({children}) => {
                 name: fn
             });
 
+            let userToken = await AsyncStorage.getItem('userToken')
+
             const response = await axios.post(`${BASE_URL}/fileUpload`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${userToken}`
                 }
             })
             .then(response => {
